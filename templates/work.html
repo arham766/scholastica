@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Work Tasks</title>
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/styles.css') }}">
+</head>
+<body>
+    <h1>Work Tasks</h1>
+    <form method="POST">
+        <input type="text" name="assigner_id" placeholder="Assigner ID" required>
+        <input type="text" name="assign_to_id" placeholder="Assign To ID" required>
+        <input type="text" name="task_name" placeholder="Task Name" required>
+        <input type="text" name="deadline" placeholder="Deadline" required>
+        <textarea name="task_details" placeholder="Task Details" required></textarea>
+        <input type="text" name="task_priority" placeholder="Task Priority" required>
+        <textarea name="comment" placeholder="Comment" required></textarea>
+        <button type="submit">Assign Task</button>
+    </form>
+    <a href="{{ url_for('index') }}">Back to Home</a>
+</body>
+</html>

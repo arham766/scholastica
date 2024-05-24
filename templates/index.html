@@ -1,0 +1,14 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Member Management System</title>
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/styles.css') }}">
+</head>
+<body>
+    <div class="container">
+        <h1>Welcome to the Member Management System</h1>
+        <a href="{{ url_for('member') }}">Manage Members</a><br>
+        <a href="{{ url_for('work') }}">Work Tasks</a>
+    </div>
+</body>
+</html>
