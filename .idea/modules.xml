@@ -4,6 +4,7 @@
     <modules>
       <module fileurl="file://$PROJECT_DIR$/.idea/Web_Project.iml" filepath="$PROJECT_DIR$/.idea/Web_Project.iml" />
       <module fileurl="file://F:/Works Projects codes/All Science_Project_Compettion/2023/Creative_Hunt_2023_National/pythonProject - Copy/.idea/pythonProject.iml" filepath="F:/Works Projects codes/All Science_Project_Compettion/2023/Creative_Hunt_2023_National/pythonProject - Copy/.idea/pythonProject.iml" />
+      <module fileurl="file://$PROJECT_DIR$/../Scholastica Connect/scholastica/.idea/scholastica.iml" filepath="$PROJECT_DIR$/../Scholastica Connect/scholastica/.idea/scholastica.iml" />
     </modules>
   </component>
 </project>

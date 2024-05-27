@@ -23,6 +23,7 @@ gauth = GoogleAuth()
 gauth.credentials = creds
 drive = GoogleDrive(gauth)
 
+
 class MemberManager:
     def __init__(self, sheet_url, drive_folder_id):
         self.sheet_url = sheet_url
@@ -48,11 +49,14 @@ class MemberManager:
         team_sheet.append_row(member_data)
 
         member_folder_name = f"{member_id}_{name}"
-        member_folder = drive.CreateFile({'title': member_folder_name, 'parents': [{'id': self.drive_folder_id}], 'mimeType': 'application/vnd.google-apps.folder'})
+        member_folder = drive.CreateFile({'title': member_folder_name, 'parents': [{'id': self.drive_folder_id}],
+                                          'mimeType': 'application/vnd.google-apps.folder'})
         member_folder.Upload()
 
         csv_filename = f"{name}.csv"
-        csv_content = pd.DataFrame([member_data], columns=['ID', 'Name', 'Position', 'Team', 'Number', 'Email', 'Facebook ID']).to_csv(index=False)
+        csv_content = pd.DataFrame([member_data],
+                                   columns=['ID', 'Name', 'Position', 'Team', 'Number', 'Email', 'Facebook ID']).to_csv(
+            index=False)
         csv_file = drive.CreateFile({'title': csv_filename, 'parents': [{'id': member_folder['id']}]})
         csv_file.SetContentString(csv_content)
         csv_file.Upload()
@@ -84,7 +88,8 @@ class MemberManager:
             print(f"Member with {identifier} not found in team sheet '{team_name}'.")
 
         member_folder_name = f"{member_data[0]}_{member_data[1]}"
-        member_folders = drive.ListFile({'q': f"title='{member_folder_name}' and '{self.drive_folder_id}' in parents and trashed=false"}).GetList()
+        member_folders = drive.ListFile(
+            {'q': f"title='{member_folder_name}' and '{self.drive_folder_id}' in parents and trashed=false"}).GetList()
 
         if not member_folders:
             print(f"Member folder '{member_folder_name}' not found in Google Drive.")
@@ -92,10 +97,13 @@ class MemberManager:
 
         member_folder = member_folders[0]
         removed_members_folder_name = "Removed Members"
-        removed_members_folders = drive.ListFile({'q': f"title='{removed_members_folder_name}' and '{self.drive_folder_id}' in parents and trashed=false"}).GetList()
+        removed_members_folders = drive.ListFile({
+            'q': f"title='{removed_members_folder_name}' and '{self.drive_folder_id}' in parents and trashed=false"}).GetList()
 
         if not removed_members_folders:
-            removed_members_folder = drive.CreateFile({'title': removed_members_folder_name, 'parents': [{'id': self.drive_folder_id}], 'mimeType': 'application/vnd.google-apps.folder'})
+            removed_members_folder = drive.CreateFile(
+                {'title': removed_members_folder_name, 'parents': [{'id': self.drive_folder_id}],
+                 'mimeType': 'application/vnd.google-apps.folder'})
             removed_members_folder.Upload()
         else:
             removed_members_folder = removed_members_folders[0]
@@ -144,7 +152,8 @@ class MemberManager:
             central_csv_df = pd.read_csv(StringIO(central_csv_content))
         else:
             central_csv_df = pd.DataFrame()
-            central_csv_file = drive.CreateFile({'title': central_csv_filename, 'parents': [{'id': self.drive_folder_id}], 'mimeType': 'text/csv'})
+            central_csv_file = drive.CreateFile(
+                {'title': central_csv_filename, 'parents': [{'id': self.drive_folder_id}], 'mimeType': 'text/csv'})
 
         task_data_df = pd.DataFrame([task_data])
         central_csv_df = pd.concat([central_csv_df, task_data_df], ignore_index=True)
@@ -169,7 +178,8 @@ class MemberManager:
             member_csv_df = pd.read_csv(StringIO(member_csv_content))
         else:
             member_csv_df = pd.DataFrame()
-            member_csv_file = drive.CreateFile({'title': csv_filename, 'parents': [{'id': member_folder['id']}], 'mimeType': 'text/csv'})
+            member_csv_file = drive.CreateFile(
+                {'title': csv_filename, 'parents': [{'id': member_folder['id']}], 'mimeType': 'text/csv'})
 
         task_data_df = pd.DataFrame([task_data])
         member_csv_df = pd.concat([member_csv_df, task_data_df], ignore_index=True)
@@ -199,24 +209,16 @@ class MemberManager:
         message = MIMEMultipart()
         message['From'] = sender_email
         message['To'] = assign_to_email
-        message['Cc'] = assign_by_email  # CC to the person assigning the task
-        message['Subject'] = f"Task Assignment: {task_data['Task Name']}"
+        message['Subject'] = f"Task Assignment: {task_data['Task']}"
 
         body = f"Dear {member_name},\n\n" \
-               f"I hope this email finds you well. I am assigning you a new task. " \
-               f"Please find the details below:\n\n" \
-               f"Assigned By: {assign_by_name} ({assign_by_position}, {assign_by_team})\n" \
-               f"Task Name: {task_data['Task Name']}\n" \
+               f"You have been assigned a new task by {assign_by_name} ({assign_by_position}, {assign_by_team}).\n\n" \
+               f"Task: {task_data['Task']}\n" \
+               f"Description: {task_data['Description']}\n" \
                f"Deadline: {task_data['Deadline']}\n" \
-               f"Task Details: {task_data['Task Details']}\n" \
-               f"Task Priority: {task_data['Task Priority']}\n" \
-               f"Comments: {task_data['Comment']}\n\n" \
-               f"Please review the task details and let me know if you have any questions or need further clarification. " \
-               f"Your prompt attention to this matter is appreciated to ensure we meet our project goals.\n\n" \
-               f"Thank you for your dedication and commitment to our organization.\n\n" \
-               f"Best regards," \
-               f"\n{assign_by_name}\n" \
-               f" {assign_by_position}, {assign_by_team}\n"
+               f"Priority: {task_data['Priority']}\n\n" \
+               f"Best regards,\n" \
+               f"Task Management System\n"
 
         message.attach(MIMEText(body, 'plain'))
 
@@ -224,7 +226,7 @@ class MemberManager:
             server = smtplib.SMTP(smtp_server, port)
             server.starttls()
             server.login(sender_email, password)
-            server.sendmail(sender_email, [assign_to_email, assign_by_email], message.as_string())
+            server.sendmail(sender_email, assign_to_email, message.as_string())
             server.quit()
             print("Email notification sent successfully.")
         except Exception as e:
@@ -234,127 +236,158 @@ class MemberManager:
         try:
             cell = self.central_sheet.find(member_id)
             row = cell.row
-            member_email = self.central_sheet.cell(row, 6).value
-            return member_email
+            return self.central_sheet.cell(row, 6).value
         except gspread.exceptions.CellNotFound:
-            print(f"Member with ID '{member_id}' not found.")
             return None
 
     def get_member_name(self, member_id):
         try:
             cell = self.central_sheet.find(member_id)
             row = cell.row
-            member_name = self.central_sheet.cell(row, 2).value
-            return member_name
+            return self.central_sheet.cell(row, 2).value
         except gspread.exceptions.CellNotFound:
-            print(f"Member with ID '{member_id}' not found.")
             return None
 
     def get_member_position(self, member_id):
         try:
             cell = self.central_sheet.find(member_id)
             row = cell.row
-            member_position = self.central_sheet.cell(row, 3).value
-            return member_position
+            return self.central_sheet.cell(row, 3).value
         except gspread.exceptions.CellNotFound:
-            print(f"Member with ID '{member_id}' not found.")
             return None
 
     def get_member_team(self, member_id):
         try:
             cell = self.central_sheet.find(member_id)
             row = cell.row
-            member_team = self.central_sheet.cell(row, 4).value
-            return member_team
+            return self.central_sheet.cell(row, 4).value
         except gspread.exceptions.CellNotFound:
-            print(f"Member with ID '{member_id}' not found.")
             return None
 
     def get_member_folder(self, member_id):
-        try:
-            cell = self.central_sheet.find(member_id)
-            if cell is None:
-                print(f"Member with ID '{member_id}' not found.")
-                return None
-            row = cell.row
-            member_data = self.central_sheet.row_values(row)
-            member_folder_name = f"{member_data[0]}_{member_data[1]}"
-            member_folders = drive.ListFile({'q': f"title='{member_folder_name}' and '{self.drive_folder_id}' in parents and trashed=false"}).GetList()
-            if member_folders:
-                return member_folders[0]
-            else:
-                print(f"Member folder '{member_folder_name}' not found in Google Drive.")
-                return None
-        except gspread.CellNotFound:
-            print(f"Member with ID '{member_id}' not found in Google Sheet.")
-            return None
+        member_folder_name = f"{member_id}_{self.get_member_name(member_id)}"
+        member_folders = drive.ListFile(
+            {'q': f"title='{member_folder_name}' and '{self.drive_folder_id}' in parents and trashed=false"}).GetList()
+        if member_folders:
+            return member_folders[0]
+        return None
 
     def view_all_members(self):
-        members = self.central_sheet.get_all_records(head=1)
-        return members
+        member_data = self.central_sheet.get_all_records()
+        return member_data
 
-    def update_member(self, identifier, name=None, position=None, team=None, number=None, email=None, facebook=None):
-        try:
-            if identifier.isdigit():
-                cell = self.central_sheet.find(identifier)
-            else:
-                cell = self.central_sheet.find(identifier, in_column=2)
-            row = cell.row
-        except gspread.exceptions.CellNotFound:
-            print(f"Member with {identifier} not found.")
+
+manager = MemberManager(
+    "https://docs.google.com/spreadsheets/d/19uBSdFE6yxLQG3TeB56B7UoI8BdN3X8UvlIvRyKo6lc/edit?usp=sharing",
+    "1sizii9neOQMc6xlUATuCf7CbPjl7NvX2")
+
+
+class MeetingManager:
+    def __init__(self, sheet_url, drive_folder_id):
+        self.sheet_url = sheet_url
+        self.spreadsheet = client.open_by_url(sheet_url)
+        self.meeting_sheet = self.spreadsheet.worksheet("Meetings")
+        self.drive_folder_id = drive_folder_id
+
+    def create_meeting(self, title, date, time, location, description, invitee_ids):
+        meeting_id = ''.join(random.choices(string.digits, k=5))
+        meeting_data = [meeting_id, title, date, time, location, description]
+        self.meeting_sheet.append_row(meeting_data)
+
+        for invitee_id in invitee_ids:
+            self.send_meeting_invitation(meeting_id, title, date, time, location, description, invitee_id)
+
+        print(f"Meeting '{title}' created successfully.")
+
+    def send_meeting_invitation(self, meeting_id, title, date, time, location, description, invitee_id):
+        invitee_email = manager.get_member_email(invitee_id)
+        invitee_name = manager.get_member_name(invitee_id)
+
+        if not invitee_email:
+            print(f"Member with ID '{invitee_id}' not found or has no associated email address.")
             return
 
-        update_data = {
-            'Name': name,
-            'Position': position,
-            'Team': team,
-            'Number': number,
-            'Email': email,
-            'Facebook ID': facebook
-        }
+        smtp_server = 'smtp.gmail.com'
+        port = 587
+        sender_email = 'studentsoftwarearham@gmail.com'
+        password = 'bjnneiyvvobjqkmm'
 
-        for key, value in update_data.items():
-            if value:
-                col = self.central_sheet.find(key).col
-                self.central_sheet.update_cell(row, col, value)
+        message = MIMEMultipart()
+        message['From'] = sender_email
+        message['To'] = invitee_email
+        message['Subject'] = f"Meeting Invitation: {title}"
 
-manager = MemberManager("https://docs.google.com/spreadsheets/d/19uBSdFE6yxLQG3TeB56B7UoI8BdN3X8UvlIvRyKo6lc/edit?usp=sharing", "1sizii9neOQMc6xlUATuCf7CbPjl7NvX2")
+        body = f"Dear {invitee_name},\n\n" \
+               f"You are invited to a meeting. Please find the details below:\n\n" \
+               f"Title: {title}\n" \
+               f"Date: {date}\n" \
+               f"Time: {time}\n" \
+               f"Location: {location}\n" \
+               f"Description: {description}\n\n" \
+               f"Please confirm your attendance.\n\n" \
+               f"Best regards,\n" \
+               f"Meeting Organizer\n"
+
+        message.attach(MIMEText(body, 'plain'))
+
+        try:
+            server = smtplib.SMTP(smtp_server, port)
+            server.starttls()
+            server.login(sender_email, password)
+            server.sendmail(sender_email, invitee_email, message.as_string())
+            server.quit()
+            print("Email notification sent successfully.")
+        except Exception as e:
+            print(f"Error sending email notification: {e}")
+
+
+meeting_manager = MeetingManager(
+    "https://docs.google.com/spreadsheets/d/19uBSdFE6yxLQG3TeB56B7UoI8BdN3X8UvlIvRyKo6lc/edit?usp=sharing",
+    "1sizii9neOQMc6xlUATuCf7CbPjl7NvX2")
+
 
 @app.route('/')
 def index():
     return render_template('index.html')
 
-@app.route('/member', methods=['GET', 'POST'])
-def member():
+
+@app.route('/meeting', methods=['GET', 'POST'])
+def meeting():
     if request.method == 'POST':
-        name = request.form['name']
-        position = request.form['position']
-        team = request.form['team']
-        number = request.form['number']
-        email = request.form['email']
-        facebook = request.form['facebook']
-        manager.add_member(name, position, team, number, email, facebook)
-        return redirect(url_for('member'))
+        title = request.form['title']
+        date = request.form['date']
+        time = request.form['time']
+        location = request.form['location']
+        description = request.form['description']
+        invitee_ids = request.form.getlist('invitee_ids')
+        meeting_manager.create_meeting(title, date, time, location, description, invitee_ids)
+        return redirect(url_for('meeting'))
     members = manager.view_all_members()
-    return render_template('member.html', members=members)
+    return render_template('meeting.html', members=members)
 
-@app.route('/delete_member', methods=['POST'])
-def delete_member():
-    identifier = request.form['identifier']
-    manager.delete_member(identifier)
-    return redirect(url_for('member'))
 
-@app.route('/update_member', methods=['POST'])
-def update_member():
-    identifier = request.form['identifier']
-    name = request.form.get('name')
-    position = request.form.get('position')
-    team = request.form.get('team')
-    number = request.form.get('number')
-    email = request.form.get('email')
-    facebook = request.form.get('facebook')
-    manager.update_member(identifier, name, position, team, number, email, facebook)
-    return redirect(url_for('member'))
+@app.route('/call_meeting', methods=['POST'])
+def call_meeting():
+    caller_id = request.form['caller_id']
+    audience = request.form['audience']
+    date = request.form['date']
+    time = request.form['time']
+    zoom_link = request.form['zoom_link']
+    agenda = request.form['agenda']
+    contact_person = request.form['contact_person']
+    contact_info = request.form['contact_info']
+
+    if audience == 'All':
+        invitee_ids = [member['ID'] for member in manager.view_all_members()]
+    else:
+        invitee_ids = [member['ID'] for member in manager.view_all_members() if member['Team'] == audience]
+
+    meeting_title = f"Meeting called by {caller_id}"
+    description = f"Agenda: {agenda}\nZoom Link: {zoom_link}\nContact Person: {contact_person}\nContact Info: {contact_info}"
+
+    meeting_manager.create_meeting(meeting_title, date, time, 'Online', description, invitee_ids)
+    return redirect(url_for('index'))
+
 
 @app.route('/work', methods=['GET', 'POST'])
 def work():
@@ -366,16 +399,67 @@ def work():
         task_details = request.form['task_details']
         task_priority = request.form['task_priority']
         comment = request.form['comment']
+
         task_data = {
-            'Task Name': task_name,
+            'Task': task_name,
+            'Description': task_details,
             'Deadline': deadline,
-            'Task Details': task_details,
-            'Task Priority': task_priority,
+            'Priority': task_priority,
             'Comment': comment
         }
         manager.assign_task(assigner_id, assign_to_id, task_data)
         return redirect(url_for('work'))
     return render_template('work.html')
+
+
+@app.route('/members')
+def members():
+    all_members = manager.view_all_members()
+    return render_template('members.html', members=all_members)
+
+
+@app.route('/delete_member', methods=['POST'])
+def delete_member():
+    identifier = request.form['identifier']
+    manager.delete_member(identifier)
+    return redirect(url_for('members'))
+
+
+@app.route('/update_member', methods=['POST'])
+def update_member():
+    identifier = request.form['identifier']
+    name = request.form.get('name')
+    position = request.form.get('position')
+    team = request.form.get('team')
+    number = request.form.get('number')
+    email = request.form.get('email')
+    facebook = request.form.get('facebook')
+
+    member = manager.get_member_name(identifier)
+    if not member:
+        print(f"Member with ID or Name '{identifier}' not found.")
+        return redirect(url_for('members'))
+
+    # Implement logic to update member details in the Google Sheet
+    # Example:
+    cell = manager.central_sheet.find(identifier)
+    row = cell.row
+    if name:
+        manager.central_sheet.update_cell(row, 2, name)
+    if position:
+        manager.central_sheet.update_cell(row, 3, position)
+    if team:
+        manager.central_sheet.update_cell(row, 4, team)
+    if number:
+        manager.central_sheet.update_cell(row, 5, number)
+    if email:
+        manager.central_sheet.update_cell(row, 6, email)
+    if facebook:
+        manager.central_sheet.update_cell(row, 7, facebook)
+
+    print(f"Member '{identifier}' updated successfully.")
+    return redirect(url_for('members'))
+
 
 if __name__ == '__main__':
     app.run(debug=True)

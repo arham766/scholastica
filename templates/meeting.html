@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Work Tasks</title>
+    <title>Call for Meetings</title>
     <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/styles.css') }}">
     <style>
@@ -48,7 +48,7 @@
             margin-top: 20px;
         }
 
-        input, textarea {
+        input, select, textarea {
             width: 100%;
             padding: 10px;
             margin-bottom: 10px;
@@ -103,16 +103,24 @@
 </head>
 <body>
     <div class="container text-center my-5">
-        <h1>Work Tasks</h1>
-        <form method="POST">
-            <input class="form-control" type="text" name="assigner_id" placeholder="Assigner ID" required>
-            <input class="form-control" type="text" name="assign_to_id" placeholder="Assign To ID" required>
-            <input class="form-control" type="text" name="task_name" placeholder="Task Name" required>
-            <input class="form-control" type="text" name="deadline" placeholder="Deadline" required>
-            <textarea class="form-control" name="task_details" placeholder="Task Details" required></textarea>
-            <input class="form-control" type="text" name="task_priority" placeholder="Task Priority" required>
-            <textarea class="form-control" name="comment" placeholder="Comment" required></textarea>
-            <button class="btn btn-primary" type="submit">Assign Task</button>
+        <h1>Call for Meeting</h1>
+        <form method="POST" action="{{ url_for('call_meeting') }}">
+            <input class="form-control" type="text" name="caller_id" placeholder="Caller ID" required>
+            <select class="form-control" name="audience" required>
+                <option value="">Select Audience</option>
+                <option value="All">All Members</option>
+                <!-- Dynamically populated options based on member sheets -->
+                {% for sheet in member_sheets %}
+                    <option value="{{ sheet }}">{{ sheet }}</option>
+                {% endfor %}
+            </select>
+            <input class="form-control" type="text" name="date" placeholder="Date (YYYY-MM-DD)" required>
+            <input class="form-control" type="text" name="time" placeholder="Time (HH:MM)" required>
+            <input class="form-control" type="text" name="zoom_link" placeholder="Zoom Link" required>
+            <textarea class="form-control" name="agenda" placeholder="Agenda Items (separated by commas)" required></textarea>
+            <input class="form-control" type="text" name="contact_person" placeholder="Contact Person" required>
+            <input class="form-control" type="text" name="contact_info" placeholder="Contact Email/Phone Number" required>
+            <button class="btn btn-primary" type="submit">Send Invitation</button>
         </form>
         <a class="back-link" href="{{ url_for('index') }}">Back to Home</a>
     </div>

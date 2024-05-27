@@ -1,14 +1,81 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Member Management System</title>
+    <title>Home Page</title>
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/styles.css') }}">
+    <style>
+        /* General Styles */
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #f06, #4a90e2);
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            color: #333;
+        }
+
+        /* Container Styles */
+        .container {
+            background: #fff;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.2);
+            max-width: 800px;
+            margin: auto;
+            transition: transform 0.2s;
+        }
+
+        .container:hover {
+            transform: scale(1.02);
+        }
+
+        /* Heading Styles */
+        h1 {
+            font-size: 2.5em;
+            margin-bottom: 20px;
+            color: #333;
+            border-bottom: 2px solid #3498db;
+            display: inline-block;
+            padding-bottom: 10px;
+        }
+
+        /* Button Styles */
+        a.nav-item {
+            display: block;
+            background-color: #3498db;
+            color: white;
+            text-align: center;
+            padding: 10px;
+            margin-top: 10px;
+            border-radius: 5px;
+            text-decoration: none;
+            transition: background-color 0.3s, transform 0.2s;
+        }
+
+        a.nav-item:hover {
+            background-color: #2980b9;
+            transform: scale(1.05);
+        }
+
+        a.nav-item:active {
+            background-color: #1abc9c;
+            transform: scale(0.98);
+        }
+    </style>
 </head>
 <body>
-    <div class="container">
-        <h1>Welcome to the Member Management System</h1>
-        <a href="{{ url_for('member') }}">Manage Members</a><br>
-        <a href="{{ url_for('work') }}">Work Tasks</a>
+    <div class="container text-center my-5">
+        <h1>Home Page</h1>
+        <a class="nav-item nav-link" href="{{ url_for('work') }}">Work Tasks</a>
+        <a class="nav-item nav-link" href="{{ url_for('meeting') }}">Meetings</a>
+        <a class="nav-item nav-link" href="{{ url_for('members') }}">Manage Members</a>
     </div>
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.3/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
 </body>
 </html>
